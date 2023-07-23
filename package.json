@@ -1,0 +1,24 @@
+{
+  "name": "probable-parakeet-module-12-challenge",
+  "version": "1.0.0",
+  "description": "Module 12 Challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Craigien/probable-parakeet-module-12-challenge.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Craigien/probable-parakeet-module-12-challenge/issues"
+  },
+  "homepage": "https://github.com/Craigien/probable-parakeet-module-12-challenge#readme",
+  "dependencies": {
+    "inquirer": "^8.2.4",
+    "mysql2": "^2.2.5"
+  }
+}
