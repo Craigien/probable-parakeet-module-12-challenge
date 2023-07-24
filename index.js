@@ -31,12 +31,44 @@ function init()
             {
                 viewAllDepartments();
             }
+
+            else if (response.userChoice === "View all roles")
+            {
+                viewAllRoles();
+            }
+
+            else if (response.userChoice === "View all employees")
+            {
+                viewAllEmployees();
+            }
         });
 }
 
 function viewAllDepartments()
 {
+    db.query('SELECT * FROM department', function (err, results) {
+        console.table(results);
+    });
 
+    // init();
+}
+
+function viewAllRoles()
+{
+    db.query('SELECT * FROM role', function (err, results) {
+        console.table(results);
+    });
+
+    // init();
+}
+
+function viewAllEmployees()
+{
+    db.query('SELECT * FROM employee', function (err, results) {
+        console.table(results);
+    });
+
+    // init();
 }
 
 init();
