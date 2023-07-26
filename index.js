@@ -7,7 +7,7 @@ const db = mysql.createConnection(
     {
         host: 'localhost',
         user: 'root',
-        password: '',
+        password: 'FunWithSQL$?',
         database: 'human_resources_db',
     }
 );
@@ -50,6 +50,11 @@ function init()
             else if (response.userChoice === "Add a role")
             {
                 addRole();
+            }
+
+            else if (response.userChoice === "Add an employee")
+            {
+                addEmployee();
             }
         });
 }
@@ -166,6 +171,137 @@ function addRole()
     
                     console.log(results);
                 });
+            });
+        });
+}
+
+function addEmployee()
+{
+    const roleNames = [];
+    const roles = [];
+
+    const managersFullNames = [];
+    const managers = [];
+
+    db.query('SELECT * FROM role', function (err, results) {
+
+        if (err) throw err;
+        
+        for (let i = 0; i < results.length; i++)
+        {
+            roleNames.push(results[i].title);
+
+            const roleInfo = {
+                roleName: results[i].title,
+                id: results[i].id
+            };
+
+            roles.push(roleInfo);
+        }
+
+        console.log(roleNames);
+        console.log(roles);
+    });
+
+    db.query('SELECT * FROM employee', function (err, results) {
+
+        if (err) throw err;
+        
+        for (let i = 0; i < results.length; i++)
+        {
+            const fullName = results[i].first_name + " " + results[i].last_name;
+
+            managersFullNames.push(fullName);
+
+            const managerInfo = {
+                fullName: fullName,
+                id: results[i].id
+            };
+
+            managers.push(managerInfo);
+        }
+
+        managersFullNames.push("None");
+
+        console.log(managersFullNames);
+        console.log(managers);
+    });
+
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: "Please enter the employee's first name",
+                name: 'firstName',
+            },
+
+            {
+                type: 'input',
+                message: "Please enter the employee's last name",
+                name: 'lastName',
+            },
+
+            {
+                type: 'list',
+                message: "Please select the employee's role",
+                choices: roleNames,
+                name: 'role',
+            },
+
+            {
+                type: 'list',
+                message: "Please select the employee's manager",
+                choices: managersFullNames,
+                name: 'manager',
+            },
+        ])
+        .then((response) => {
+            console.log(response);
+
+            let roleID;
+            let managerID;
+            let params;
+
+            for (let i = 0; i < roleNames.length; i++)
+            {
+                if (roleNames[i] === roles[i].roleName)
+                {
+                    roleID = roles[i].id;
+
+                    break;
+                }
+            }
+
+            for (let i = 0; i < managersFullNames.length; i++)
+            {
+                if (managersFullNames[i] === managers[i].fullName)
+                {
+                    managerID = managers[i].id;
+
+                    break;
+                }
+            }
+
+            if (response.manager === "None")
+            {
+                params = [response.firstName, response.lastName, roleID, managerID];
+            }
+
+            else
+            {
+                params = [response.firstName, response.lastName, roleID, null];
+            }
+
+            console.log("Role ID: " + roleID);
+            console.log("Manager ID: " + managerID);
+
+            db.query('INSERT INTO `employee` (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', params, function (err, results) {
+                if (err)
+                {
+                    console.log(err);
+                }
+
+                console.log(results);
             });
         });
 }
