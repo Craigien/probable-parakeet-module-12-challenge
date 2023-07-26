@@ -108,8 +108,6 @@ function addDepartment()
 
 function addRole()
 {
-    let params = [];
-
     const departments = [];
 
     db.query('SELECT * FROM department', function (err, results) {
@@ -119,19 +117,19 @@ function addRole()
             departments.push(results[i].name);
         }
 
-        console.log(departments);
+        // console.log(departments);
     });
 
     inquirer
         .prompt([
             {
                 type: 'input',
-                message: 'Please enter the name of the new role',
-                name: 'name',
+                message: 'Please enter the title of the new role',
+                name: 'title',
             },
 
             {
-                type: 'input',
+                type: 'number',
                 message: 'Please enter the salary for the new role',
                 name: 'salary',
             },
@@ -144,27 +142,30 @@ function addRole()
             },
         ])
         .then((response) => {
-            console.log(response);
+            // console.log(response);
 
             let departmentID;
 
             db.query('SELECT id FROM department WHERE name = ?', response.department, function (err, results) {
-                departmentID = results[0].id;
-
-                params = [response.name, response.salary, departmentID];
-
-                console.log(params);
-            });
-        })
-        .then(() => {
-
-            db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', params, function (err, results) {
                 if (err)
                 {
                     console.log(err);
                 }
 
-                console.log(results);
+                departmentID = results[0].id;
+
+                const params = [response.title, response.salary, departmentID];
+
+                console.log("Params: " + params);
+
+                db.query('INSERT INTO `role` (title, salary, department_id) VALUES (?, ?, ?)', params, function (err, results) {
+                    if (err)
+                    {
+                        console.log(err);
+                    }
+    
+                    console.log(results);
+                });
             });
         });
 }
@@ -172,5 +173,3 @@ function addRole()
 init();
 
 // To Do
-
-// Fix SQL syntax error
