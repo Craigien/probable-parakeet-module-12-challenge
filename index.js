@@ -1,14 +1,15 @@
 // Import required libraries
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+require('dotenv').config();
 
 // Create SQL database connection
 const db = mysql.createConnection(
     {
         host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'human_resources_db',
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
     }
 );
 
@@ -67,28 +68,35 @@ function init()
 function viewAllDepartments()
 {
     db.query('SELECT * FROM department', function (err, results) {
-        console.table(results);
-    });
+        if (err) throw err;
 
-    // init();
+        console.table(results);
+
+        init();
+    });
 }
 
 function viewAllRoles()
 {
-    db.query('SELECT * FROM role', function (err, results) {
+    db.query('SELECT role.title, role.id, department.name, role.salary AS department FROM role JOIN department ON role.department_id = department.id ORDER BY role.id', function (err, results) {
+        if (err) throw err;
+        
         console.table(results);
-    });
 
-    // init();
+        init();
+    });
 }
 
 function viewAllEmployees()
 {
-    db.query('SELECT * FROM employee', function (err, results) {
-        console.table(results);
-    });
+    db.query(`SELECT emp.id, emp.first_name, emp.last_name, role.title, department.name AS department, role.salary, CONCAT_WS(' ', manager.first_name, manager.last_name) AS manager
+    FROM employee emp LEFT JOIN employee manager ON emp.id = manager.manager_id JOIN role ON emp.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY emp.id`, function (err, results) {
+        if (err) throw err;
 
-    // init();
+        console.table(results);
+
+        init();
+    });
 }
 
 function addDepartment()
@@ -110,10 +118,10 @@ function addDepartment()
                     console.error(err);
                 }
                 console.log(results);
+
+                init();
             })
         });
-
-    // init();
 }
 
 function addRole()
@@ -134,8 +142,6 @@ function addRole()
 
             departments.push(departmentInfo);
         }
-
-        // console.log(departments);
     });
 
     inquirer
@@ -185,6 +191,8 @@ function addRole()
                 }
     
                 console.log(results);
+
+                init();
             });
         });
 }
@@ -316,6 +324,8 @@ function addEmployee()
                 }
 
                 console.log(results);
+
+                init();
             });
         });
 }
@@ -423,6 +433,8 @@ function updateEmployeeRole()
                 }
 
                 console.log(results);
+
+                init();
             });
         });
     });
@@ -431,3 +443,6 @@ function updateEmployeeRole()
 init();
 
 // To Do
+
+// Remove index from table views
+// Comments

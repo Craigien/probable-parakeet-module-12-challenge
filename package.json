@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/Craigien/probable-parakeet-module-12-challenge#readme",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "inquirer": "^8.2.4",
     "mysql2": "^2.2.5"
   }
