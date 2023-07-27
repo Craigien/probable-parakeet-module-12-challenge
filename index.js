@@ -7,7 +7,7 @@ const db = mysql.createConnection(
     {
         host: 'localhost',
         user: 'root',
-        password: 'FunWithSQL$?',
+        password: '',
         database: 'human_resources_db',
     }
 );
@@ -55,6 +55,11 @@ function init()
             else if (response.userChoice === "Add an employee")
             {
                 addEmployee();
+            }
+
+            else if (response.userChoice === "Update an employee role")
+            {
+                updateEmployeeRole();
             }
         });
 }
@@ -114,12 +119,20 @@ function addDepartment()
 function addRole()
 {
     const departments = [];
+    const departmentNames = [];
 
     db.query('SELECT * FROM department', function (err, results) {
         
         for (let i = 0; i < results.length; i++)
         {
-            departments.push(results[i].name);
+            departmentNames.push(results[i].name);
+
+            const departmentInfo = {
+                departmentName: results[i].name,
+                id: results[i].id
+            };
+
+            departments.push(departmentInfo);
         }
 
         // console.log(departments);
@@ -142,7 +155,7 @@ function addRole()
             {
                 type: 'list',
                 message: 'Please select the department the role will be a part of',
-                choices: departments,
+                choices: departmentNames,
                 name: 'department',
             },
         ])
@@ -151,26 +164,27 @@ function addRole()
 
             let departmentID;
 
-            db.query('SELECT id FROM department WHERE name = ?', response.department, function (err, results) {
+            for (let i = 0; i < departments.length; i++)
+            {
+                if (response.department === departments[i].name)
+                {
+                    departmentID = departments[i].id;
+
+                    break;
+                }
+            }
+
+            const params = [response.title, response.salary, departmentID];
+
+            console.log("Params: " + params);
+
+            db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', params, function (err, results) {
                 if (err)
                 {
                     console.log(err);
                 }
-
-                departmentID = results[0].id;
-
-                const params = [response.title, response.salary, departmentID];
-
-                console.log("Params: " + params);
-
-                db.query('INSERT INTO `role` (title, salary, department_id) VALUES (?, ?, ?)', params, function (err, results) {
-                    if (err)
-                    {
-                        console.log(err);
-                    }
     
-                    console.log(results);
-                });
+                console.log(results);
             });
         });
 }
@@ -262,9 +276,9 @@ function addEmployee()
             let managerID;
             let params;
 
-            for (let i = 0; i < roleNames.length; i++)
+            for (let i = 0; i < roles.length; i++)
             {
-                if (roleNames[i] === roles[i].roleName)
+                if (response.role === roles[i].roleName)
                 {
                     roleID = roles[i].id;
 
@@ -272,9 +286,9 @@ function addEmployee()
                 }
             }
 
-            for (let i = 0; i < managersFullNames.length; i++)
+            for (let i = 0; i < managers.length; i++)
             {
-                if (managersFullNames[i] === managers[i].fullName)
+                if (response.manager === managers[i].fullName)
                 {
                     managerID = managers[i].id;
 
@@ -284,18 +298,18 @@ function addEmployee()
 
             if (response.manager === "None")
             {
-                params = [response.firstName, response.lastName, roleID, managerID];
+                params = [response.firstName, response.lastName, roleID, null];
             }
 
             else
             {
-                params = [response.firstName, response.lastName, roleID, null];
+                params = [response.firstName, response.lastName, roleID, managerID];
             }
 
             console.log("Role ID: " + roleID);
             console.log("Manager ID: " + managerID);
 
-            db.query('INSERT INTO `employee` (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', params, function (err, results) {
+            db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', params, function (err, results) {
                 if (err)
                 {
                     console.log(err);
@@ -304,6 +318,114 @@ function addEmployee()
                 console.log(results);
             });
         });
+}
+
+function updateEmployeeRole()
+{
+    const roleNames = [];
+    const roles = [];
+
+    const employeesFullNames = [];
+    const employees = [];
+
+    db.query('SELECT * FROM role', function (err, results) {
+
+        if (err) throw err;
+        
+        for (let i = 0; i < results.length; i++)
+        {
+            roleNames.push(results[i].title);
+
+            const roleInfo = {
+                roleName: results[i].title,
+                id: results[i].id
+            };
+
+            roles.push(roleInfo);
+        }
+
+        console.log(roleNames);
+        console.log(roles);
+    });
+
+    db.query('SELECT * FROM employee', function (err, results) {
+
+        if (err) throw err;
+        
+        for (let i = 0; i < results.length; i++)
+        {
+            const fullName = results[i].first_name + " " + results[i].last_name;
+
+            employeesFullNames.push(fullName);
+
+            const employeeInfo = {
+                fullName: fullName,
+                id: results[i].id
+            };
+
+            employees.push(employeeInfo);
+        }
+
+        console.log(employeesFullNames);
+        console.log(employees);
+
+        inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: "Please select the employee who will receive the new role",
+                choices: employeesFullNames,
+                name: 'employee',
+            },
+
+            {
+                type: 'list',
+                message: "Please select the employee's new role",
+                choices: roleNames,
+                name: 'role',
+            },
+        ])
+        .then((response) => {
+            console.log(response);
+
+            let roleID;
+            let employeeID;
+
+            for (let i = 0; i < roles.length; i++)
+            {
+                if (response.role == roles[i].roleName)
+                {
+                    roleID = roles[i].id;
+
+                    break;
+                }
+            }
+
+            for (let i = 0; i < employees.length; i++)
+            {
+                if (response.employee == employees[i].fullName)
+                {
+                    employeeID = employees[i].id;
+
+                    break;
+                }
+            }
+
+            console.log("Role ID: " + roleID);
+            console.log("Employee ID: " + employeeID);
+
+            const params = [roleID, employeeID];
+
+            db.query('UPDATE employee SET role_id = ? WHERE id = ?', params, function (err, results) {
+                if (err)
+                {
+                    console.log(err);
+                }
+
+                console.log(results);
+            });
+        });
+    });
 }
 
 init();
