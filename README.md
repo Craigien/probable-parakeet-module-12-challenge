@@ -13,7 +13,7 @@ This application will require Node.js to use.  It will also require running "npm
 
 To start the application, run the command "node index.js" in your terminal.  Next, select the action you want to take.  After doing so, data will either be displayed or you will be asked to enter data and make selections to complete the action.
 
-Employee Tracker Video Demonstration: 
+Employee Tracker Video Demonstration: https://drive.google.com/file/d/1NP8V2v15eabd4-hpR-CZTwnW0xqGQJlK/view?usp=sharing
 
 ## Credits
 
