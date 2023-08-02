@@ -446,7 +446,3 @@ function updateEmployeeRole()
 }
 
 init();
-
-// To Do
-
-// Remove index from table views
